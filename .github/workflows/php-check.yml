@@ -1,0 +1,31 @@
+name: PHP Syntax Check + S3 Upload
+on: [push]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Install PHP
+        run: sudo apt-get update && sudo apt-get install -y php-cli
+
+      - name: PHP Syntax Check
+        run: find. -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Create S3 Bucket
+        run: aws s3 mb s3://safeshare-kajal-$(date +%s) --region ap-south-1
+
+      - name: Create Test File
+        run: echo "<h1>SafeShare by Kajal - Day 5 ✅</h1><p>Robot ne upload kar diya!</p>" > index.html
+
+      - name: Upload to S3
+        run: aws s3 cp index.html s3://$(aws s3 ls | grep safeshare-kajal | tail -n1 | awk '{print $3}')/ --region ap-south-1

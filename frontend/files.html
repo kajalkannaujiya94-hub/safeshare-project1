@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SafeShare - All Files</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="env.js"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+
+<h2>All Files</h2>
+<ul id="fileList"></ul>
+
+<script>
+async function loadFiles() {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch(`${API_BASE}/api/files/list.php`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        const ul = document.getElementById("fileList");
+        ul.innerHTML = "";
+        if (data.status === "success") {
+            data.files.forEach(f => {
+                const li = document.createElement("li");
+                li.innerHTML = `<a href="${f.url}" target="_blank">${f.filename}</a>`;
+                ul.appendChild(li);
+            });
+        } else {
+            ul.innerHTML = "<li>" + (data.error || "No files") + "</li>";
+        }
+    } catch (e) {
+        console.error("Load files error:", e);
+    }
+}
+
+loadFiles();
+</script>
+
+<a href="upload.html">⬅ Back to Upload</a>
+
+</body>
+</html>

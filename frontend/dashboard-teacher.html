@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="env.js"></script>
+    <script src="config.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - SafeShare</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-family: 'Segoe UI', sans-serif;
+            padding: 30px 20px;
+        }
+        .navbar {
+            background: white; border-radius: 16px; padding: 16px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 30px;
+        }
+        .navbar-brand { display: flex; align-items: center; gap: 10px; }
+        .navbar-icon {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 18px;
+        }
+        .navbar-brand h1 {
+            font-size: 20px; font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .navbar-user { display: flex; align-items: center; gap: 14px; }
+        .navbar-user span { font-size: 14px; color: #666; font-weight: 500; }
+        .navbar-user strong { color: #333; }
+        .badge {
+            background: linear-gradient(135deg, #f093fb, #764ba2);
+            color: white; padding: 3px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+        .btn-logout {
+            padding: 8px 18px; background: transparent;
+            border: 2px solid #667eea; border-radius: 10px;
+            color: #667eea; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-logout:hover { background: #667eea; color: white; }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* CARD */
+        .card {
+            background: white; border-radius: 20px; padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .card-title {
+            font-size: 16px; font-weight: 700; color: #333;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* UPLOAD */
+        .upload-area {
+            border: 2px dashed #c4b5fd; border-radius: 14px;
+            padding: 30px 20px; text-align: center; background: #faf8ff;
+            margin-bottom: 16px; cursor: pointer; transition: border-color 0.2s;
+        }
+        .upload-area:hover { border-color: #667eea; }
+        .upload-area p { color: #888; font-size: 13px; margin-top: 8px; }
+        .upload-icon { font-size: 36px; }
+        #file { display: none; }
+        #fileName { font-size: 13px; color: #667eea; font-weight: 600; margin-top: 8px; min-height: 18px; }
+        .btn-upload {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-upload:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-upload:active { transform: translateY(0); }
+        .upload-msg {
+            text-align: center; font-size: 13px; font-weight: 500;
+            margin-top: 12px; min-height: 18px;
+        }
+
+        /* TABLE */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        thead tr { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        thead th { padding: 12px 16px; text-align: left; font-weight: 600; font-size: 13px; }
+        thead th:first-child { border-radius: 10px 0 0 10px; }
+        thead th:last-child { border-radius: 0 10px 10px 0; }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.15s; }
+        tbody tr:hover { background: #faf8ff; }
+        tbody td { padding: 12px 16px; color: #444; }
+        .file-cell { display: flex; align-items: center; gap: 10px; }
+        .file-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; flex-shrink: 0;
+        }
+        .file-name { font-weight: 600; color: #333; }
+        .btn-download {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            text-decoration: none; transition: opacity 0.2s;
+        }
+        .btn-download:hover { opacity: 0.85; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #aaa; }
+        .empty-state p { font-size: 14px; margin-top: 8px; }
+
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-brand">
+        <div class="navbar-icon">🔒</div>
+        <h1>SafeShare</h1>
+    </div>
+    <div class="navbar-user">
+        <span>Welcome, <strong id="userName"></strong></span>
+        <span class="badge">Teacher</span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="grid">
+
+    <!-- UPLOAD CARD -->
+    <div class="card">
+        <div class="card-title">📤 Upload File</div>
+        <div class="upload-area" onclick="document.getElementById('file').click()">
+            <div class="upload-icon">📁</div>
+            <p>Click to select a file</p>
+            <div id="fileName"></div>
+        </div>
+        <input type="file" id="file" onchange="document.getElementById('fileName').innerText = this.files[0]?.name || ''">
+        <button class="btn-upload" onclick="upload()">Upload File</button>
+        <div class="upload-msg" id="uploadMsg"></div>
+    </div>
+
+    <!-- FILES CARD -->
+    <div class="card">
+        <div class="card-title">📂 All Files</div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>File</th><th>Uploader</th><th>Date</th><th>Download</th></tr>
+                </thead>
+                <tbody id="filesTable">
+                    <tr><td colspan="4"><div class="empty-state"><div style="font-size:40px">📭</div><p>Loading files...</p></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function getUser() {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+}
+
+const user = getUser();
+if (!user || user.role !== "teacher") window.location = "index.html";
+document.getElementById("userName").innerText = user.name || "Teacher";
+
+const API = API_BASE;
+
+async function upload() {
+    const token = localStorage.getItem("token");
+    const fileInput = document.getElementById("file");
+    const msg = document.getElementById("uploadMsg");
+
+    if (!fileInput.files.length) {
+        msg.style.color = "#e53e3e";
+        msg.innerText = "Please select a file first";
+        return;
+    }
+
+    msg.style.color = "#667eea";
+    msg.innerText = "Uploading...";
+
+    const form = new FormData();
+    form.append("file", fileInput.files[0]);
+
+    try {
+        const res = await fetch(`${API}/api/upload/upload.php`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token },
+            body: form
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+            msg.style.color = "#38a169";
+            msg.innerText = "File uploaded successfully!";
+            document.getElementById("fileName").innerText = "";
+            fileInput.value = "";
+            loadFiles();
+        } else {
+            msg.style.color = "#e53e3e";
+            msg.innerText = "Error: " + data.error;
+        }
+    } catch (e) {
+        msg.style.color = "#e53e3e";
+        msg.innerText = "Upload failed: " + e;
+    }
+}
+
+async function loadFiles() {
+    const token = localStorage.getItem("token");
+    try {
+        const res = await fetch(`${API}/api/files/list.php`, {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        const tbody = document.getElementById("filesTable");
+        tbody.innerHTML = "";
+
+        if (data.status === "success" && data.files.length > 0) {
+            data.files.forEach(f => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><div class="file-cell"><div class="file-icon">📄</div><span class="file-name">${f.filename}</span></div></td>
+                    <td>${f.name || 'Unknown'}</td>
+                    <td style="color:#888;font-size:12px">${f.uploaded_at || "—"}</td>
+                    <td><a href="${f.url}" target="_blank" class="btn-download">Download</a></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div style="font-size:40px">📭</div><p>No files uploaded yet</p></div></td></tr>`;
+        }
+    } catch (e) {
+        console.error("Load error:", e);
+    }
+}
+
+function logout() {
+    localStorage.clear();
+    window.location = "index.html";
+}
+
+loadFiles();
+</script>
+</body>
+</html>

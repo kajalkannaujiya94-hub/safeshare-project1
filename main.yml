@@ -1,0 +1,37 @@
+name: Safeshare Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Code checkout karo
+        uses: actions/checkout@v4
+      
+      - name: AWS login karenge
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      
+      - name: Docker image build karo
+        run: |
+          docker build -f docker/Dockerfile -t safeshare-app .
+      
+      - name: ECR me login karo
+        run: |
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 123456789.dkr.ecr.ap-south-1.amazonaws.com
+      
+      - name: Image ko ECR me push karo
+        run: |
+          docker tag safeshare-app:latest 123456789.dkr.ecr.ap-south-1.amazonaws.com/safeshare-app:latest
+          docker push 123456789.dkr.ecr.ap-south-1.amazonaws.com/safeshare-app:latest
+      
+      - name: ECS service update karo
+        run: |
+          aws ecs update-service --cluster safeshare-cluster --service safeshare-service --force-new-deployment --region ap-south-1

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SafeShare - Upload File</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="env.js"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+
+<h2>Upload File</h2>
+
+<input type="file" id="file">
+<button onclick="upload()">📤 Upload</button>
+
+<p id="msg"></p>
+
+<a href="files.html">📂 View All Files</a>
+
+<script>
+async function upload() {
+    const token = localStorage.getItem("token");
+    const msg = document.getElementById("msg");
+
+    if (!token) {
+        window.location = "index.html";
+        return;
+    }
+
+    const fileInput = document.getElementById("file");
+    if (!fileInput.files.length) {
+        msg.innerText = "Please select a file.";
+        return;
+    }
+
+    const form = new FormData();
+    form.append("file", fileInput.files[0]);
+
+    try {
+        // Use API_BASE from config.js
+        const res = await fetch(`${API_BASE}/api/upload/upload.php`, {
+            method: "POST",
+            headers: { "Authorization": "Bearer " + token },
+            body: form
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            msg.innerText = "Uploaded: " + data.file;
+        } else {
+            msg.innerText = "Error: " + (data.error || "Upload failed");
+        }
+    } catch (e) {
+        msg.innerText = "Upload failed: " + e;
+    }
+}
+</script>
+
+</body>
+</html>
