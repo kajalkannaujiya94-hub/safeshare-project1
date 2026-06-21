@@ -295,7 +295,7 @@
 
     <!-- UPLOAD CARD -->
     <div class="card">
-        <div class="card-title"><span>📤</span> Upload File</div>
+        <div class="card-title"><span>📤</span> Upload File Now</div>
 
         <div class="upload-area" onclick="document.getElementById('file').click()">
             <div class="upload-icon">📁</div>
@@ -305,7 +305,7 @@
 
         <input type="file" id="file" onchange="document.getElementById('fileName').innerText = this.files[0]?.name || ''">
 
-        <button class="btn-upload" onclick="upload()">Upload File</button>
+        <button class="btn-upload" onclick="upload()">Upload File Now</button>
         <div class="upload-msg" id="uploadMsg"></div>
 
         <!-- SHARE LINK BOX — shown after successful upload -->
