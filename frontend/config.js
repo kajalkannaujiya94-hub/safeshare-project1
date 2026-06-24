@@ -1,1 +1,1 @@
-const API_BASE = "http://safeshare-alb-1625146449.us-east-1.elb.amazonaws.com";
+const API_BASE = "http://safeshare-alb-v2-911047746.us-east-1.elb.amazonaws.com";
